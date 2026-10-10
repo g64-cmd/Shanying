@@ -29,7 +29,7 @@
 | Android 构建 | JDK 17 / AGP 8.13.2 / Gradle 8.13 | 官方工具链兼容表支持该组合；P0 再验证所选 AndroidX 的 minCompileSdk 与实际构建 |
 | 观测 | slog JSON + OpenTelemetry + Prometheus/Grafana/Tempo | request/trace ID 贯穿 HTTP、任务、外部调用 |
 | 测试 | Go testing/testcontainers-go；Vitest/RTL/MSW/Playwright；JUnit/Espresso | 数据约束用真实 PG 集成测试，三端用共享契约样例 |
-| 交付 | GitHub Actions + Docker Compose + Caddy | 单机可复现，先不引入 Kubernetes/Terraform |
+| 交付 | Ubuntu 24.04 + GitHub Actions + Docker Compose + Caddy | 后端 CI 固定 ubuntu-24.04；server 不在 Windows/WSL 运行；先不引入 Kubernetes/Terraform |
 
 Go、React、Node 状态已在 2026-10-09 官方页面核查；其余 major 是设计基线，不是“所有最新版本”的声明。框架补丁、镜像 digest、Android 工具链兼容组合必须在 P0 安装验证后进入锁文件。**本轮没有执行依赖解析，不能把这张表当成已经验证可编译的 lockfile。**
 
@@ -66,6 +66,6 @@ Android `minSdk=26`；初步 `compileSdk/targetSdk=36`。本稿以本地安装�
 
 推荐没有训练机和 GPU 前置条件；v2 首版不部署 embedding 模型。FFmpeg 转码和媒体出网预计是主要资源消耗，需分别测量 CPU 秒/视频分钟、转码失败率、存储放大倍数、每次有效播放字节数。搜索与推荐由 profile 按阶段启用。
 
-部署使用自有本地服务器，不假定云主机采购。P0 依据实际 CPU、内存、磁盘和上行带宽确定限额；合成视频也必须测量真实转码与播放开销。不能用容器能启动替代容量验证。
+部署使用自有 Ubuntu 24.04 服务器，不假定云主机采购；server 构建、运行与验收同样固定该系统，不使用 Windows/WSL 运行路径，后端 CI 固定 `runs-on: ubuntu-24.04`。P0 依据实际 CPU、内存、磁盘和上行带宽确定限额；合成视频也必须测量真实转码与播放开销。不能用容器能启动替代容量验证。
 
 Hertz 配套 WebSocket 旧扩展已归档，其仓库建议迁移到 HTTP Adaptor + gorilla/websocket；本稿按该路线调整，不直接沿用旧 Gin/net/http 中间件。[迁移依据](https://github.com/hertz-contrib/websocket)

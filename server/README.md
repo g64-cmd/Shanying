@@ -2,6 +2,8 @@
 
 归属分支：`dev/backend`。采用 Go 1.26.x + Hertz 的模块化单体，API 与 worker 共享业务模块和发布版本。
 
+server 的构建、运行和验收目标为自有 Ubuntu 24.04 服务器，后端 CI 固定 `ubuntu-24.04`；不使用 Windows/WSL 运行 server。
+
 | 目录 | 职责 |
 | --- | --- |
 | [cmd/api](cmd/api/README.md) | API、WebSocket 入口 |

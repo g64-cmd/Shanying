@@ -136,11 +136,11 @@ PG 队列适合当前规模，减少 Kafka/NATS 运维。真正需要独立队�
 
 ## 6. 部署与资源假设
 
-开发采用 Docker Compose；Windows 使用 Docker Desktop 的 Linux 容器/WSL2，生产构建和 CI 以 Linux 为基准。Web 构建为静态文件，反向代理同源暴露 `/api/v2`、`/ws`、`/media`，TLS 在代理终止。
+server 的构建、运行与验收固定 Ubuntu 24.04，自有服务器使用 Docker Compose，后端 CI 固定 `runs-on: ubuntu-24.04`。不使用浮动 Linux runner，不提供 Windows/WSL 的 server 运行路径。Windows 编辑工作区可以运行纯仓库检查，后端真实验证仍在 Ubuntu 24.04 完成。该部署决定记录在[ADR 0001](../adr/0001-server-ubuntu-24.md)。Web 构建为静态文件，反向代理同源暴露 `/api/v2`、`/ws`、`/media`，TLS 在代理终止。
 
 建议 profile：`core`（PG、Redis、S3、api、worker、Web）、`discovery`（Meilisearch、Gorse）、`observability`（Prometheus、Grafana、OTel Collector、Tempo）。基础日志采用 JSON 输出到 stdout，首版不新增 Loki 集群。
 
-server 明确部署在开发者自有本地服务器，不以采购云主机为前提。保留开发与验收文档中现有的 4 vCPU / 2 GB 测试机基线。P0 核实操作系统、CPU/内存、磁盘空间、外网可达方式与上行带宽，记录各进程 RSS、启动时间和转码峰值。
+server 明确部署在开发者自有 Ubuntu 24.04 服务器，不以采购云主机为前提。保留开发与验收文档中现有的 4 vCPU / 2 GB 测试机基线。P0 核实目标 Ubuntu 安装与补丁、CPU/内存、磁盘空间、外网可达方式与上行带宽，记录各进程 RSS、启动时间和转码峰值。
 
 2 GB 下不得预先承诺全部组件和目标数据量同时运行。先限制转码并发为 1，关闭完整监控 profile，测量 core 再启用 discovery；若仍不足，记录容量限制，选择分时转码、把转码 worker 放在开发机或调整资源分配。Android 模拟器在开发机运行。只有所测组合能实际稳定运行时才进行性能验收，不能把不同配置的结果合并成一次全栈成绩。
 
