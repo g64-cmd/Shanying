@@ -5,7 +5,7 @@
 | 层 | 选择 | 原因与边界 |
 | --- | --- | --- |
 | 后端 | Go 1.26.x；Hertz（P0 锁定稳定版本） | 按用户决定采用 Hertz；框架只在 HTTP adapter 中出现 |
-| 数据库 | PostgreSQL 17，受支持的最新补丁 | 事务、行锁、约束、JSONB 满足当前四类业务；不为模块新增数据库类型 |
+| 数据库 | PostgreSQL 官方 Docker 镜像 17 系列，P0 锁定受支持补丁与 digest | Compose 管理，不在宿主机安装 PG 服务；事务、行锁、约束、JSONB 满足当前四类业务 |
 | SQL | pgx v5 + sqlc 1.x | 保留 SQL 可控性，生成类型安全访问代码；替换 sqlx 反射映射 |
 | 迁移 | goose v3，SQL migrations | 迁移进入代码评审；不在服务启动时自动改表 |
 | 缓存 | Redis 8.x + go-redis v9 | 缓存、限流、短期会话列表、在线通知提示；不保存唯一业务事实 |
@@ -30,6 +30,8 @@
 | 观测 | slog JSON + OpenTelemetry + Prometheus/Grafana/Tempo | request/trace ID 贯穿 HTTP、任务、外部调用 |
 | 测试 | Go testing/testcontainers-go；Vitest/RTL/MSW/Playwright；JUnit/Espresso | 数据约束用真实 PG 集成测试，三端用共享契约样例 |
 | 交付 | Ubuntu 24.04 + GitHub Actions + Docker Compose + Caddy | 后端 CI 固定 ubuntu-24.04；server 不在 Windows/WSL 运行；先不引入 Kubernetes/Terraform |
+
+服务配置遵循 Docker 优先：基础组件尽可能使用项目维护的镜像，API/worker 使用仓库构建镜像，FFmpeg/ffprobe 固定在媒体 worker 镜像内；宿主机维护 Docker/Compose 与必要基础环境。Compose、配置和数据卷定义可复现，秘密外部注入；完整范围与例外见[部署说明](../../deploy/README.md)。此原则不改变已经选择的组件，也不要求一次启动全部服务。
 
 Go、React、Node 状态已在 2026-10-09 官方页面核查；其余 major 是设计基线，不是“所有最新版本”的声明。框架补丁、镜像 digest、Android 工具链兼容组合必须在 P0 安装验证后进入锁文件。**本轮没有执行依赖解析，不能把这张表当成已经验证可编译的 lockfile。**
 

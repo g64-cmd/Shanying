@@ -11,12 +11,15 @@
 | Android JDK | JDK 17 | PATH 中 `java -version` 为 Java 25 | A-001 需配置 JDK 17，未构建 Android |
 | Android Gradle/SDK | AGP 8.13.2 / Gradle 8.13 / SDK 36（待兼容验证） | 无项目 wrapper；ANDROID_HOME/ANDROID_SDK_ROOT 未配置 | 尚未验证，不等于断言机器未安装 SDK |
 | Docker Compose | Ubuntu 24.04 服务器上的 Linux 容器 | 本次编辑工作区 PATH 未找到 docker 命令 | 未连接服务器或启动容器；P0 在 Ubuntu 上核实 |
+| PostgreSQL 服务 | Docker Official Image 的 17 系列；不在宿主机安装 PG 服务 | 用户指定镜像部署，未解析补丁版本/变体/digest | 未拉取镜像或执行真实 PG 测试 |
 | 应用库与生成器 | 见技术选型 | 尚未解析 | 无 go.sum、pnpm-lock、Gradle 锁文件 |
 | 数据库/搜索/推荐/存储镜像 | 固定版本及 digest | 尚未拉取 | 无可部署镜像清单 |
 
 仓库检查脚本只使用 Node 标准库，不需要依赖安装。没有为尚不存在的应用创建伪锁文件；创建实际工程时提交解析后的 Go/pnpm/Gradle 锁定配置，并将验证命令、结果及兼容性偏差补充到本页。
 
 上表的 Windows Go 命令输出仅是编辑工作区的工具清单。本轮未在 Windows 上构建或运行 server，不能作为 Ubuntu 工具链验证；server 的真实 Go/Docker 版本在目标 Ubuntu 24.04 环境中另行核实。
+
+服务配置尽可能使用 Docker/Compose，具体方式见[部署说明](../deploy/README.md)。P0 为每个实际接入的服务记录镜像仓库、完整版本/变体、digest、目标架构、数据卷/配置入口和验证命令；`postgres:17` 是主版本要求，不是已解析锁定的部署引用。当前没有拉取镜像、创建容器或数据卷。
 
 CI 使用以下固定 Action 提交，已核实官方仓库对应源码；这不等于已运行 GitHub Actions：
 

@@ -24,9 +24,11 @@ Node 固定版本见根目录 .node-version。本轮检查无需安装包或启�
 
 server 在自有 Ubuntu 24.04 服务器上构建、运行和验收，后端 CI 同样固定 ubuntu-24.04，不使用 Windows/WSL 的 server 运行路径。运行方式沿用 Docker Compose；本次仅检查编辑工作区，尚未连接 Ubuntu 服务器。部署决定见[ADR 0001](adr/0001-server-ubuntu-24.md)。
 
+服务配置尽可能通过 Docker/Compose 完成，PostgreSQL 使用官方 17 系列镜像，API/worker 与其它基础服务优先容器化。后续运行说明以拉取/构建锁定镜像、注入配置、挂载持久化卷、执行迁移和启动 Compose 为主；不要求在宿主机逐项安装 PG 等服务。镜像、配置与例外记录见[部署说明](../deploy/README.md)及[ADR 0002](adr/0002-docker-first-services.md)，目前尚无真实 Compose 启动结果。
+
 ## 3. 三分支共同起点与同步
 
-共同基底由本轮 main 的仓库初始化和 Ubuntu 24.04 运行基线修订提交共同承载。先创建三个本地分支，再将它们快进同步到最终 main，保持当前工作目录位于 main。没有推送、归档旧仓库或部署服务器。
+共同基底由本轮 main 的仓库初始化、Ubuntu 24.04 运行基线及 Docker 优先服务配置修订提交共同承载。先创建三个本地分支，再将它们快进同步到最终 main，保持当前工作目录位于 main。没有推送、归档旧仓库或部署服务器。
 
 复核本地分支的提交：
 

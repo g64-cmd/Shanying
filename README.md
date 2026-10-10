@@ -32,6 +32,8 @@ node scripts/check-repository.mjs
 
 检查无需依赖安装；当前仅验证仓库结构、文档链接、JSON 语法与文本约定。完整开发入口、分支同步、实际工具链差异和下一步任务见[开发说明](docs/development.md)与[依赖基线](docs/dependency-baseline.md)。
 
-本轮初始化及 Ubuntu 24.04 运行基线修订共同构成 main 与 `dev/backend`、`dev/web`、`dev/android` 的共同起点；三分支按小切片普通 merge 回 main，公共契约先集成再同步客户端。本次仅建立并同步本地分支，未推送或部署；P0 六项技术验证仍待执行。
+本轮仓库初始化与部署约束修订共同构成 main 与 `dev/backend`、`dev/web`、`dev/android` 的共同起点；三分支按小切片普通 merge 回 main，公共契约先集成再同步客户端。本次仅建立并同步本地分支，未推送或部署；P0 六项技术验证仍待执行。
+
+服务配置尽可能使用 Docker Compose：PostgreSQL 采用官方 17 系列镜像，其它基础服务与 API/worker 优先容器化。镜像部署前锁定版本与 digest，持久化数据独立于容器生命周期；具体边界见[部署说明](deploy/README.md)。
 
 旧版参考：[shanying_server](https://github.com/g64-cmd/shanying_server) · [shanying_web](https://github.com/g64-cmd/shanying_web)。旧仓库尚未归档。

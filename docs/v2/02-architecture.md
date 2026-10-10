@@ -138,6 +138,10 @@ PG 队列适合当前规模，减少 Kafka/NATS 运维。真正需要独立队�
 
 server 的构建、运行与验收固定 Ubuntu 24.04，自有服务器使用 Docker Compose，后端 CI 固定 `runs-on: ubuntu-24.04`。不使用浮动 Linux runner，不提供 Windows/WSL 的 server 运行路径。Windows 编辑工作区可以运行纯仓库检查，后端真实验证仍在 Ubuntu 24.04 完成。该部署决定记录在[ADR 0001](../adr/0001-server-ubuntu-24.md)。Web 构建为静态文件，反向代理同源暴露 `/api/v2`、`/ws`、`/media`，TLS 在代理终止。
 
+服务及配置尽可能通过 Docker 镜像和 Compose 管理，见[ADR 0002](../adr/0002-docker-first-services.md)。PostgreSQL 使用官方 17 系列镜像，不在宿主机安装 PG 服务；Redis、S3/SeaweedFS、搜索、推荐、代理与观测同样优先容器化。API/worker 使用本仓库构建的镜像，媒体 worker 镜像包含固定版本 FFmpeg/ffprobe。宿主机仅维护容器运行时和必要的系统、网络、存储环境；有实际需要的宿主运行例外记录证据、影响与回退，不默默偏离默认方式。
+
+Compose、非敏感配置和构建定义纳入 deploy，秘密外部注入。PG 与媒体的数据明确挂到持久化卷或 bind mount，生命周期独立于容器；镜像重建不能替代迁移与恢复。P0 锁定具体镜像补丁版本、变体与 digest，major 标签只是选型边界。
+
 建议 profile：`core`（PG、Redis、S3、api、worker、Web）、`discovery`（Meilisearch、Gorse）、`observability`（Prometheus、Grafana、OTel Collector、Tempo）。基础日志采用 JSON 输出到 stdout，首版不新增 Loki 集群。
 
 server 明确部署在开发者自有 Ubuntu 24.04 服务器，不以采购云主机为前提。保留开发与验收文档中现有的 4 vCPU / 2 GB 测试机基线。P0 核实目标 Ubuntu 安装与补丁、CPU/内存、磁盘空间、外网可达方式与上行带宽，记录各进程 RSS、启动时间和转码峰值。

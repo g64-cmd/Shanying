@@ -6,6 +6,8 @@
 
 2026-10-10 用户补充 server 仅在自有 Ubuntu 24 服务器运行，实施固定为 Ubuntu 24.04；不考虑 Windows/WSL 运行 server。D09 与[ADR 0001](../adr/0001-server-ubuntu-24.md)记录这一约束，取代此前 Windows/WSL 后端开发运行路径。
 
+同日用户补充尽可能通过 Docker 完成服务配置，PostgreSQL 拉取 17 系列镜像，不在宿主机安装 PG 服务；D10 与[ADR 0002](../adr/0002-docker-first-services.md)明确容器、配置与持久化边界。
+
 | ADR | 决定 | 接受的代价 | 重审条件 |
 | --- | --- | --- | --- |
 | D01 | 模块化单体+独立worker，单仓三端 | 数据库和发布仍有共享故障域 | 独立伸缩/发布需求和测量证据出现 |
@@ -17,6 +19,7 @@
 | D07 | 三职责分支小步合并main | 需要维护契约和集成纪律 | 多人协作时增加临时feature分支 |
 | D08 | Web先贯通，Android逐步接入 | 早期两端功能不完全一致 | 有Android优先展示需求 |
 | D09 | server 运行与验证固定 Ubuntu 24.04，后端 CI 固定 ubuntu-24.04 | 后端验证需真实 Ubuntu 环境；Windows 仅可做仓库编辑/文档检查 | 用户改变目标系统或真实环境出现兼容失败 |
+| D10 | 服务配置 Docker 优先，PG 使用官方 17 系列镜像，Compose 管理配置与持久化 | 需维护镜像版本、卷、配置、备份和资源限额 | 实际组件兼容性或资源约束要求有记录的宿主运行例外 |
 
 ## 2. 主要风险与处理
 
@@ -44,7 +47,7 @@
 
 ## 4. 资料与证据索引
 
-核查日期均为2026-10-09。源码使用固定提交；官方文档和维护状态会变化，实施时需要按选定版本复核。来源支持组件能力或核查事实，架构、配额、时延和工期是本项目的设计判断。
+原设计来源核查日期为2026-10-09；PostgreSQL Docker 镜像与数据卷参考于2026-10-10补充核查。源码使用固定提交；官方文档和维护状态会变化，实施时需要按选定版本复核。来源支持组件能力或核查事实，架构、配额、时延和工期是本项目的设计判断。
 
 | 来源 | 用于支持 |
 | --- | --- |
@@ -55,6 +58,8 @@
 | [React版本](https://react.dev/versions) | 19.3版本依据 |
 | [Vite 8](https://vite.dev/blog/announcing-vite8) | Web构建主版本依据 |
 | [PostgreSQL版本策略](https://www.postgresql.org/support/versioning/) | 17系列支持期；不要求追最新major |
+| [PostgreSQL 官方镜像说明](https://github.com/docker-library/docs/tree/master/postgres) | PostgreSQL 镜像与 17 系列选择；实际补丁/变体/digest 待 P0 锁定 |
+| [Docker 数据卷](https://docs.docker.com/engine/storage/volumes/) | 持久化数据独立于容器生命周期 |
 | [PostgreSQL SELECT/锁](https://www.postgresql.org/docs/17/sql-select.html) | SKIP LOCKED工作队列模式的基础语义 |
 | [Hertz文档](https://www.cloudwego.io/docs/hertz/) | 当前HTTP框架；不因框架选择预设业务微服务 |
 | [sqlc](https://sqlc.dev/) | 从SQL生成类型安全代码 |

@@ -138,6 +138,10 @@ PostgreSQL 是业务事实来源；Redis、搜索和推荐数据是可重建缓�
 
 server 的构建、运行与验收以 Ubuntu 24.04 为基线，部署使用该服务器上的 Docker Compose；后端 CI 固定 `runs-on: ubuntu-24.04`，不用浮动 Linux runner，也不提供 Windows/WSL 的 server 运行路径。Windows 可以编辑仓库或执行纯文档检查，本机检查不替代 Ubuntu 后端验证。保留规划的 **4 vCPU / 2 GB** 测试基线，但实际服务器配置、磁盘、网络和上行带宽须 P0 核实。先测 core，再启用 discovery/observability；转码初始并发为 1，不能预先承诺 2 GB 同时承载全部组件与数据集。
 
+尽可能通过 Docker 镜像与 Compose 管理服务及其配置。PostgreSQL 使用 Docker Official Image 的 **17 系列**，不在 Ubuntu 宿主机安装 PostgreSQL 服务；Redis、SeaweedFS、Meilisearch、Gorse、Caddy 与按需启用的观测组件同样优先容器化。API/worker 从仓库构建项目镜像，FFmpeg/ffprobe 固定在媒体 worker 镜像中，避免依赖宿主机手工安装。宿主机维护 Docker Engine、Compose 及必要的系统、网络和存储环境。确需宿主运行的例外记录实际原因、影响与替代/回退方案，并同步部署文档。
+
+Compose、非敏感配置和镜像构建定义进入 deploy；秘密通过配置注入，PG 与媒体使用显式持久化卷或 bind mount，不能把唯一数据留在容器可写层。`postgres:17` 仅表示主版本选择，实际部署前锁定完整补丁版本、镜像变体与 digest，记录到依赖基线。容器重建不等于数据库迁移或数据恢复，真实 PG 验证使用锁定的 17 系列容器。
+
 PG 与媒体分别备份；缓存和投影可重建。迁移采用扩展、兼容、回填、收缩，避免破坏性改表与应用切换同时发生；不能把强行 down 迁移当默认回退。操作自有服务器时确认具体环境与目标路径，不清理其它服务或无关数据。
 
 性能、工期、RPO/RTO 均是待验证目标。报告保留提交、依赖/镜像版本、硬件、资源限额、数据种子、负载脚本和原始结果；不同运行配置分别报告，元数据 API 容量与视频分发能力分开表述。
