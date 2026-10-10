@@ -1,0 +1,64 @@
+# 开发入口与共同基底
+
+日期：2026-10-10（北京时间）。本轮落实 v2 0.2 版设计的仓库结构，供 `dev/backend`、`dev/web`、`dev/android` 从同一 main 提交起步。
+
+## 1. 当前可运行的检查
+
+在仓库根目录执行（Windows PowerShell 与 Linux 相同）：
+
+```sh
+node --version
+node scripts/check-repository.mjs
+git diff --check
+```
+
+Node 固定版本见根目录 .node-version。本轮检查无需安装包或启动容器：检查目录职责入口、相对链接目标、JSON 文件和 Markdown JSON 示例语法、文本 UTF-8/结尾换行，并拒绝 commerce 目录。链接检查不联网，也不校验标题锚点；本轮没有 Go 导入检查、OpenAPI/schema 校验或三端构建。
+
+已配置[仓库 CI](../.github/workflows/repository.yml)，在 main、三个开发分支的 push 和所有 PR 上执行相同检查，使用 Linux/Windows runner。工作流配置已经落地，远程运行结果需推送后验证。
+
+## 2. 目录与实现状态
+
+目录使用 README 跟踪职责，不用空业务包或伪启动命令占位。实际入口见根[README](../README.md)。server、apps、contracts、SDK、deploy、tests 当前都是结构入口，没有服务、页面、APK、正式接口、数据库或部署。
+
+首个 Go/Web/Android 工程创建时，再建立真实构建配置和依赖锁；版本偏差与验证结果更新到[依赖基线](dependency-baseline.md)。统一检查入口随实现扩展，增加对应格式、lint、架构、契约和构建任务，不能一直只检查文档。
+
+## 3. 三分支共同起点与同步
+
+共同基底由本轮 main 的初始化提交承载，提交说明为 `初始化三端共同仓库基底`。本轮在此提交创建三个本地分支，保持当前工作目录位于 main。没有推送、归档旧仓库或部署服务器。
+
+复核本地分支的提交：
+
+```sh
+git rev-parse main dev/backend dev/web dev/android
+git status --short --branch
+```
+
+初始化后四个提交值应相同。开始一个端的任务前确认工作区干净，再切到对应分支，例如：
+
+```sh
+git switch dev/backend
+```
+
+三分支职责分别是 server/deploy/契约、apps/web/Web SDK、apps/android。公共契约先合入 main，三端再同步；小切片使用普通 merge，已共享分支不 rebase/force-push。以后同步时在所需分支执行 `git merge main`，并保留冲突处理与相关验证。
+
+单人顺序开发使用当前 checkout 即可；并行任务必须使用独立 worktree，同一个目录不同时切换分支。分支推进后无需保持 tip 相等，共同基底应仍是三分支共同祖先。
+
+## 4. 后续领取次序
+
+1. B-001 / C-001：实际 Go 模块、最小 Hertz 契约、生成器与架构检查；正式契约先进入 main。
+2. W-001 / A-001：锁定 pnpm 10 和 JDK 17 工具链，建立 React 与 Java Views 最小工程，共用契约样例。
+3. B-002 / B-003 / B-004：PG 事务与任务、S3/FFmpeg、Gorse 禁训练与 Meilisearch 探针，逐项保留真实失败与结果。
+4. Q-001 完善运行/CI，再按 P1 Web 真实闭环、Android 契约接入的顺序推进。
+
+本次完成的是共同仓库基底，不代表 P0 全部通过。任务编号和完成定义见[开发与验收](v2/07-delivery.md)。
+
+## 5. 初始化的本地验证
+
+2026-10-10 在 Windows / Node 24.11.0 实际运行：
+
+- 仓库检查通过：34 个必需入口、37 份 Markdown、81 个本地链接、2 个 JSON 示例/文件。
+- 临时加入错误 JSON 和缺失链接，检查退出码为 1 且分别报告错误；移除探针后恢复通过。
+- 从 apps/web 目录调用同一脚本也通过，检查以脚本位置确定仓库根目录。
+- `node --check scripts/check-repository.mjs` 与 `git diff --check` 通过。
+
+CI 配置已静态审阅，尚未在 GitHub runner 上运行；本机可用 Python/Node 依赖中未找到 YAML 解析器，因此没有 YAML 解析器校验结果。三端构建、正式 schema 校验、容器启动与六项 P0 探针均未执行。

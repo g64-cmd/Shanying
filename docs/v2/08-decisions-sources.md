@@ -73,7 +73,9 @@
 | [OpenAPI 3.0.3](https://spec.openapis.org/oas/v3.0.3.html) | HTTP契约格式 |
 | [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen) · [openapi-fetch](https://openapi-ts.dev/openapi-fetch/) · [Java生成器](https://openapi-generator.tech/docs/generators/java/) | Go/TS/Java契约生成路线 |
 
-## 5. 本轮交付与验证边界
+## 5. 设计轮交付与验证边界（2026-10-09 快照）
+
+以下保留设计轮的历史状态；2026-10-10 的仓库结构、本地分支与检查入口初始化另见[开发说明](../development.md)和[依赖基线](../dependency-baseline.md)。
 
 已完成：两旧仓库固定源码核查、官方能力/维护状态核查、v2设计与选型、领域数据与协议草案、里程碑及验收计划。
 
