@@ -4,11 +4,11 @@
 
 - [x] 1.1 建立三端目录与四份 AGENTS.md，通过仓库结构脚本检查。
 - [x] 1.2 编写需求、工作流和共享 API 容器，人工检查技术栈、职责及未实现边界。
-- [ ] 1.3 创建 main/develop/三端分支与 worktree，通过 git worktree list 和共同祖先检查。
+- [x] 1.3 创建 main/develop/三端分支与 worktree，通过 git worktree list 和共同基点 9d4aec0 检查。
 
 ## 2. 基线验证
 
-- [ ] 2.1 运行 OpenSpec strict validation、仓库检查及 git diff --check，记录验证结果。
+- [x] 2.1 运行 OpenSpec strict validation、仓库检查及 git diff --cached --check，结果通过；证据见 docs/baseline-validation.md。
 
 ## Workflow follow-up
 
