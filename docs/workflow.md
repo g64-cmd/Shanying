@@ -45,6 +45,7 @@ git worktree add .worktree/android -b dev/android develop
 - Web：类型检查、生产构建、主要交互及真实接口联调。
 - Android：Gradle 编译、JVM 契约测试；播放器与生命周期需设备证据。
 - 发布：三端适配、核心闭环、权限边界、媒体失败恢复、迁移与回滚演练、部署健康检查。
+- 当前验收见 define-shanying-platform：跨入口隐私矩阵、首条私聊权限、多店隔离、支付重放、部分退款、财务持久化、广告预算和模拟整链。模拟通过不代表真实支付或税务验收。
 
 检查不通过或未运行须记录 fail / not_run，不允许用“文件已创建”替代运行验收。
 

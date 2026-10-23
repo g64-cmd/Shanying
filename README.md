@@ -16,6 +16,7 @@
 三端是同一 Git 仓库中的独立工程，不创建嵌套仓库或 submodule。根目录集中存放共享资料的目录，避免散落文件。
 
 从 [需求基线](docs/requirements.md)、[工作流](docs/workflow.md) 和 [AGENTS.md](AGENTS.md) 开始。
+当前产品规格为 [define-shanying-platform](openspec/changes/define-shanying-platform/proposal.md)，覆盖内容、隐私私聊、多商家交易、资金、广告及治理；业务实现尚未开始。
 开发环境 Windows 11；运行与集成验收环境 Ubuntu 26.04 LTS，服务优先 Docker Compose。
 
 检查：`node scripts/check-repository.mjs`；`openspec validate bootstrap-shanying-monorepo --strict`。

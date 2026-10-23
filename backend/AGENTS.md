@@ -2,8 +2,8 @@
 
 继承根 AGENTS.md。工作目录 .worktree/backend，分支 dev/backend，默认仅修改 backend/。
 
-- Go + CloudWeGo Hertz，采用模块化单体：账号、内容、互动、关系等领域隔离；先避免无必要的微服务拆分。
-- 优先采用字节开源生态的 HTTP/中间件能力；Kitex 仅在有实际 RPC 拆分需求时引入。数据库和对象存储不强求字节产品。
+- Go + CloudWeGo Hertz，采用单机模块化单体：账号、内容、关系、消息、交易、资金、广告等领域隔离；本轮禁止微服务及分布式拆分。
+- 优先采用字节开源生态的 HTTP/中间件能力，不引入 Kitex/RPC；数据库不强求字节产品。
 - PostgreSQL 17 官方镜像作为初始数据存储方案；缓存、对象存储、转码队列的具体实现须在相应设计中确定。
 - 目录规划：cmd/server、internal、migrations、tests、deploy。业务协议以根 contracts/ 为准；不得反向以 Go struct 作为唯一契约。
 - 校验认证、对象级权限、游标、上传大小/类型；媒体上传后须服务端确认归属和状态，未就绪视频不得进入公开流。

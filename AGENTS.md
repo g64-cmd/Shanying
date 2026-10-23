@@ -5,6 +5,8 @@
 - 本轮用户明确指定 Kotlin、dev/frontend、.worktree、最新 Ubuntu LTS；不得恢复旧 Java、dev/web、.worktrees 或 Ubuntu 24.04 约定。
 - 当前是工程基线。区分计划、已编码、静态检查、运行验证和人工验收；禁止把目录或 mock 当作产品完成。
 - 用户指令优先；任务范围不清时先调查已有文档。不得自行扩大首期范围。
+- 当前产品范围以 openspec/changes/define-shanying-platform 为准；初始化历史中的电商排除不再适用。采用单机模块化单体，不引入 K8s、微服务、RPC 拆分或分布式技术。
+- 资金原始快照及调整记录须持久可追溯，删除业务实体不得级联删除交易依据；所有入口统一执行账号与作品权限。具体场景见上述规格。
 
 ## 目录与写入责任
 - 单 Git 仓库；backend/、frontend/、android/ 独立管理构建与依赖。不得在其内部 git init 或添加 submodule。
