@@ -1,0 +1,6 @@
+openapi: 3.0.3
+info:
+  title: Shanying API
+  version: 0.0.0
+  description: 规划中的共享协议容器，尚未定义或实现业务接口。
+paths: {}

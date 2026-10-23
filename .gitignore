@@ -1,0 +1,16 @@
+/.worktree/
+**/node_modules/
+**/dist/
+**/build/
+**/.gradle/
+**/local.properties
+**/.idea/
+**/.env
+**/.env.*
+!**/.env.example
+*.log
+*.jks
+*.keystore
+/backend/bin/
+/backend/coverage/
+/tmp/
