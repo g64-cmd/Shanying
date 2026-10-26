@@ -1,0 +1,240 @@
+{
+  "description": "纯设计测试样例；所有身份、邮箱、令牌为假数据。valid只针对schema，不代表HTTP授权或业务验证结果。",
+  "cases": [
+    {
+      "name": "registration-request",
+      "schema": "EmailRequest",
+      "valid": true,
+      "value": {
+        "email": "alice@example.test"
+      }
+    },
+    {
+      "name": "registration-accepted",
+      "schema": "Accepted",
+      "valid": true,
+      "value": {
+        "message": "如该邮箱可用于此操作，我们将发送邮件。"
+      }
+    },
+    {
+      "name": "confirm-registration",
+      "schema": "RegistrationConfirmation",
+      "valid": true,
+      "value": {
+        "token": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "password": "sample-password-ONLY",
+        "display_name": "示例用户"
+      }
+    },
+    {
+      "name": "me",
+      "schema": "Me",
+      "valid": true,
+      "value": {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "display_name": "示例用户",
+        "bio": "",
+        "is_private": true,
+        "created_at": "2026-10-26T00:00:00Z",
+        "email": "alice@example.test",
+        "version": 1
+      }
+    },
+    {
+      "name": "public-user",
+      "schema": "User",
+      "valid": true,
+      "value": {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "display_name": "示例用户",
+        "bio": "",
+        "is_private": true,
+        "created_at": "2026-10-26T00:00:00Z"
+      }
+    },
+    {
+      "name": "web-session",
+      "schema": "SessionResult",
+      "valid": true,
+      "value": {
+        "session": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "client_type": "web",
+          "device_name": "示例浏览器",
+          "created_at": "2026-10-26T00:00:00Z",
+          "last_seen_at": "2026-10-26T00:00:00Z",
+          "idle_expires_at": "2026-11-02T00:00:00Z",
+          "absolute_expires_at": "2026-11-25T00:00:00Z",
+          "is_current": true,
+          "state": "active"
+        }
+      }
+    },
+    {
+      "name": "android-session",
+      "schema": "SessionResult",
+      "valid": true,
+      "value": {
+        "session": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "client_type": "android",
+          "device_name": "示例浏览器",
+          "created_at": "2026-10-26T00:00:00Z",
+          "last_seen_at": "2026-10-26T00:00:00Z",
+          "idle_expires_at": "2026-11-02T00:00:00Z",
+          "absolute_expires_at": "2026-11-25T00:00:00Z",
+          "is_current": true,
+          "state": "active"
+        },
+        "credentials": {
+          "access_token": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          "refresh_token": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+          "token_type": "Bearer",
+          "access_expires_at": "2026-10-26T00:15:00Z"
+        }
+      }
+    },
+    {
+      "name": "web-refresh",
+      "schema": "RefreshRequest",
+      "valid": true,
+      "value": {}
+    },
+    {
+      "name": "android-refresh",
+      "schema": "RefreshRequest",
+      "valid": true,
+      "value": {
+        "refresh_token": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+      }
+    },
+    {
+      "name": "privacy-update",
+      "schema": "PrivacyUpdate",
+      "valid": true,
+      "value": {
+        "is_private": true,
+        "expected_version": 1
+      }
+    },
+    {
+      "name": "profile-clear-bio",
+      "schema": "ProfileUpdate",
+      "valid": true,
+      "value": {
+        "bio": "",
+        "expected_version": 1
+      }
+    },
+    {
+      "name": "empty-follow-page",
+      "schema": "FollowPage",
+      "valid": true,
+      "value": {
+        "items": [],
+        "next_cursor": null
+      }
+    },
+    {
+      "name": "follow-state",
+      "schema": "Relationship",
+      "valid": true,
+      "value": {
+        "target_user_id": "11111111-1111-4111-8111-111111111111",
+        "following_state": "pending",
+        "followed_by": false,
+        "is_mutual": false
+      }
+    },
+    {
+      "name": "version-conflict",
+      "schema": "Error",
+      "valid": true,
+      "value": {
+        "error": {
+          "code": "VERSION_CONFLICT",
+          "message": "资料已更新，请重新读取。"
+        },
+        "request_id": "sample-request"
+      }
+    },
+    {
+      "name": "public-email-leak",
+      "schema": "User",
+      "valid": false,
+      "value": {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "display_name": "示例用户",
+        "bio": "",
+        "is_private": true,
+        "created_at": "2026-10-26T00:00:00Z",
+        "email": "alice@example.test"
+      }
+    },
+    {
+      "name": "profile-role-injection",
+      "schema": "ProfileUpdate",
+      "valid": false,
+      "value": {
+        "bio": "",
+        "expected_version": 1,
+        "role": "admin"
+      }
+    },
+    {
+      "name": "empty-profile-patch",
+      "schema": "ProfileUpdate",
+      "valid": false,
+      "value": {
+        "expected_version": 1
+      }
+    },
+    {
+      "name": "unknown-error",
+      "schema": "Error",
+      "valid": false,
+      "value": {
+        "error": {
+          "code": "WHATEVER",
+          "message": "test"
+        },
+        "request_id": "sample-request"
+      }
+    },
+    {
+      "name": "malformed-refresh-token",
+      "schema": "RefreshRequest",
+      "valid": false,
+      "value": {
+        "refresh_token": "too-short"
+      }
+    },
+    {
+      "name": "privacy-missing-version",
+      "schema": "PrivacyUpdate",
+      "valid": false,
+      "value": {
+        "is_private": true
+      }
+    },
+    {
+      "name": "android-without-credentials",
+      "schema": "SessionResult",
+      "valid": false,
+      "value": {
+        "session": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "client_type": "android",
+          "device_name": "示例浏览器",
+          "created_at": "2026-10-26T00:00:00Z",
+          "last_seen_at": "2026-10-26T00:00:00Z",
+          "idle_expires_at": "2026-11-02T00:00:00Z",
+          "absolute_expires_at": "2026-11-25T00:00:00Z",
+          "is_current": true,
+          "state": "active"
+        }
+      }
+    }
+  ]
+}

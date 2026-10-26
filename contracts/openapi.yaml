@@ -1,6 +1,1865 @@
 openapi: 3.0.3
 info:
   title: Shanying API
-  version: 0.0.0
-  description: 规划中的共享协议容器，尚未定义或实现业务接口。
-paths: {}
+  version: 0.1.0
+  description: 后端底座与账号权限首切片设计契约，尚未实现。行为约束详见docs/api/account-access.md。
+servers:
+  - url: /
+    description: 同源或部署根地址；统一包含/api/v1前缀的paths
+paths:
+  /health/live:
+    get:
+      operationId: getLiveness
+      summary: 进程存活
+      description: 不检查数据库；不暴露版本/环境/秘密。
+      security: []
+      parameters: []
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /health/ready:
+    get:
+      operationId: getReadiness
+      summary: 服务就绪
+      description: 检查数据库、迁移版本和停止状态；未就绪503。
+      security: []
+      parameters: []
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/auth/registration-requests:
+    post:
+      operationId: requestRegistration
+      summary: 请求注册验证邮件
+      description: 邮箱存在或按邮箱抑制仍202固定消息；同用途新令牌替代旧令牌，间隔60s。
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "202":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Accepted"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailRequest"
+  /api/v1/auth/registration-confirmations:
+    post:
+      operationId: confirmRegistration
+      summary: 确认邮箱并创建账号
+      description: 有效注册令牌+密码创建active账号；不自动登录；已使用/过期统一400 TOKEN_INVALID。
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "201":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegistrationResult"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "409":
+          $ref: "#/components/responses/Error409"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationConfirmation"
+  /api/v1/auth/password-reset-requests:
+    post:
+      operationId: requestPasswordReset
+      summary: 请求找回密码邮件
+      description: 存在/不存在/邮箱抑制统一202；无账号不发信。
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "202":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Accepted"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailRequest"
+  /api/v1/auth/password-resets:
+    post:
+      operationId: resetPassword
+      summary: 确认找回密码
+      description: 单次消费令牌，改密码并撤销全部会话，不自动登录；重复令牌400。
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "204":
+          description: 操作成功，无响应体
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+        "400":
+          $ref: "#/components/responses/Error400"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordReset"
+  /api/v1/auth/sessions:
+    post:
+      operationId: login
+      summary: 密码登录
+      description: 错误邮箱/密码统一401 AUTHENTICATION_FAILED，正确密码但suspended为403 ACCOUNT_DISABLED；web两个HttpOnly
+        cookies，android返回tokens；响应丢失需重新登录，不重放凭据响应。
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ClientType"
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+            Set-Cookie:
+              description: 仅Web，分别设置__Host-sy_access及__Host-sy_refresh，两条独立Set-Cookie；Android不设置。
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResult"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+  /api/v1/auth/refresh:
+    post:
+      operationId: refreshSession
+      summary: 轮换刷新
+      description: web仅{}且由refresh cookie识别；android必须refresh_token且无cookies。旧used令牌重放撤销整个session；不得自动重试；响应丢失重新登录。
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ClientType"
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+            Set-Cookie:
+              description: 仅Web，分别设置__Host-sy_access及__Host-sy_refresh，两条独立Set-Cookie；Android不设置。
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResult"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+  /api/v1/auth/logout:
+    post:
+      operationId: logout
+      summary: 退出当前会话
+      description: web由refresh cookie或access cookie识别并清cookie；android使用body refresh或Bearer
+        access（二者同session才允许）；未知凭据也204；DB故障503不谎称已撤销。
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/ClientType"
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "204":
+          description: 操作成功，无响应体
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+        "400":
+          $ref: "#/components/responses/Error400"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+  /api/v1/me:
+    get:
+      operationId: getMe
+      summary: 本人资料
+      description: 本人资料
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters: []
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/me/profile:
+    patch:
+      operationId: updateProfile
+      summary: 修改本人昵称和简介
+      description: expected_version必填；至少修改一字段；version冲突409；不能修改邮箱/status/角色。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "409":
+          $ref: "#/components/responses/Error409"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+  /api/v1/me/privacy:
+    patch:
+      operationId: updatePrivacy
+      summary: 修改账号私密状态
+      description: 保留既有粉丝；转公开不自动批准pending申请；version冲突409。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "409":
+          $ref: "#/components/responses/Error409"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrivacyUpdate"
+  /api/v1/me/password:
+    post:
+      operationId: changePassword
+      summary: 修改密码并退出全部设备
+      description: 验证当前密码，成功后撤销全部sessions；Web清cookies，客户端重新登录。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "204":
+          description: 操作成功，无响应体
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordChange"
+  /api/v1/me/sessions:
+    get:
+      operationId: listSessions
+      summary: 本人的会话列表
+      description: 本人的会话列表
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionPage"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/me/sessions/{session_id}:
+    delete:
+      operationId: revokeSession
+      summary: 撤销本人的一个会话
+      description: 只能本人所有；已撤销仍204；他人/不存在404；撤销当前会话清cookie。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "204":
+          description: 操作成功，无响应体
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "404":
+          $ref: "#/components/responses/Error404"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/users/{user_id}:
+    get:
+      operationId: getPublicUser
+      summary: 用户最小公开资料
+      description: 可匿名；携带无效凭据401。任一向拉黑时双方查询404；无邮箱/社交图。
+      security:
+        - {}
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "404":
+          $ref: "#/components/responses/Error404"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/users/{user_id}/relationship:
+    get:
+      operationId: getRelationship
+      summary: 查看与目标的关系
+      description: 受保护；被屏蔽对象404，本人的黑名单另有接口。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Relationship"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "404":
+          $ref: "#/components/responses/Error404"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/users/{user_id}/follow:
+    put:
+      operationId: followUser
+      summary: 关注或申请关注
+      description: 公开accepted，私密pending；重复PUT不新增；屏蔽403 RELATIONSHIP_NOT_ALLOWED，自关联400。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Relationship"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "404":
+          $ref: "#/components/responses/Error404"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+    delete:
+      operationId: unfollowUser
+      summary: 取消关注或申请
+      description: 无关系也204，删除后不影响反向关系。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "204":
+          description: 操作成功，无响应体
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/me/following:
+    get:
+      operationId: listFollowing
+      summary: 本人的关注及待批准申请
+      description: 本人的关注及待批准申请
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowPage"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/me/followers:
+    get:
+      operationId: listFollowers
+      summary: 本人的已批准粉丝
+      description: 本人的已批准粉丝
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowPage"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/me/follow-requests:
+    get:
+      operationId: listFollowRequests
+      summary: 等待本人处理的申请
+      description: 等待本人处理的申请
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowPage"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/me/follow-requests/{request_id}/approve:
+    post:
+      operationId: approveFollowRequest
+      summary: 批准关注申请
+      description: 仅followee可处理；已accepted同一request返回200；删除/不存在/他人404；屏蔽403。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Follow"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "404":
+          $ref: "#/components/responses/Error404"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/me/follow-requests/{request_id}:
+    delete:
+      operationId: rejectFollowRequest
+      summary: 拒绝关注申请
+      description: 本人pending删除；已accepted409；不存在204；存在但属于他人404。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "204":
+          description: 操作成功，无响应体
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "404":
+          $ref: "#/components/responses/Error404"
+        "409":
+          $ref: "#/components/responses/Error409"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/me/followers/{user_id}:
+    delete:
+      operationId: removeFollower
+      summary: 移除粉丝
+      description: 仅删对方关注自己的accepted关系；无accepted也204；pending申请使用拒绝接口。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "204":
+          description: 操作成功，无响应体
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/me/blocks:
+    get:
+      operationId: listBlocks
+      summary: 本人黑名单
+      description: 本人黑名单
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: "成功；身份响应Cache-Control: no-store。"
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockPage"
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+  /api/v1/me/blocks/{user_id}:
+    put:
+      operationId: blockUser
+      summary: 完整屏蔽用户
+      description: 原子插入自己的block并删除双向follow/pending；重复204；不删除交易依据。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "204":
+          description: 操作成功，无响应体
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "404":
+          $ref: "#/components/responses/Error404"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+    delete:
+      operationId: unblockUser
+      summary: 解除本人发起的屏蔽
+      description: 不存在也204；不恢复关注/申请；对方block仍生效。
+      security:
+        - BearerAccess: []
+        - WebAccessCookie: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/CSRF"
+        - $ref: "#/components/parameters/Origin"
+      responses:
+        "204":
+          description: 操作成功，无响应体
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+                minLength: 1
+                maxLength: 64
+        "400":
+          $ref: "#/components/responses/Error400"
+        "401":
+          $ref: "#/components/responses/Error401"
+        "403":
+          $ref: "#/components/responses/Error403"
+        "413":
+          $ref: "#/components/responses/Error413"
+        "415":
+          $ref: "#/components/responses/Error415"
+        "429":
+          $ref: "#/components/responses/Error429"
+        "500":
+          $ref: "#/components/responses/Error500"
+        "503":
+          $ref: "#/components/responses/Error503"
+components:
+  securitySchemes:
+    BearerAccess:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: Android access token；与cookie互斥。
+    WebAccessCookie:
+      type: apiKey
+      in: cookie
+      name: __Host-sy_access
+      description: Web HttpOnly access cookie；写操作另要求Origin及CSRF头。
+  parameters:
+    ClientType:
+      name: X-Client-Type
+      in: header
+      required: true
+      schema:
+        type: string
+        enum:
+          - web
+          - android
+      description: 凭据交付类型，不是身份授权；web要求Origin和CSRF头；android拒绝cookie。
+    CSRF:
+      name: X-CSRF-Protection
+      in: header
+      required: false
+      schema:
+        type: string
+        enum:
+          - "1"
+      description: 所有Web/携带cookie写请求必填，缺失403；Android无cookie不要求。
+    Origin:
+      name: Origin
+      in: header
+      required: false
+      schema:
+        type: string
+        maxLength: 200
+      description: Web写请求必填且精确匹配允许源；任意请求显式不可信Origin均拒绝。
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+        maxLength: 2048
+      description: 绑定调用者/集合/首请求as_of的签名游标，15分钟有效；无下一页返回null。
+  responses:
+    Error400:
+      description: 参数、令牌、cursor或自关联无效
+      headers:
+        X-Request-ID:
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Error401:
+      description: 身份/会话无效
+      headers:
+        X-Request-ID:
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Error403:
+      description: 来源、CSRF、权限或关系操作被拒绝
+      headers:
+        X-Request-ID:
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Error404:
+      description: 对象不存在或无权访问
+      headers:
+        X-Request-ID:
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Error409:
+      description: 版本/状态冲突
+      headers:
+        X-Request-ID:
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Error413:
+      description: JSON超过32KiB
+      headers:
+        X-Request-ID:
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Error415:
+      description: 写请求必须application/json
+      headers:
+        X-Request-ID:
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Error429:
+      description: 请求频率超限
+      headers:
+        X-Request-ID:
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+          description: 重试前等待的秒数
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Error500:
+      description: 内部失败，不暴露堆栈
+      headers:
+        X-Request-ID:
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Error503:
+      description: 依赖不可用或尚未就绪
+      headers:
+        X-Request-ID:
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+        - request_id
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              enum:
+                - VALIDATION_FAILED
+                - TOKEN_INVALID
+                - ACCOUNT_UNAVAILABLE
+                - AUTHENTICATION_FAILED
+                - SESSION_INVALID
+                - ACCOUNT_DISABLED
+                - FORBIDDEN
+                - ORIGIN_REJECTED
+                - CSRF_REJECTED
+                - NOT_FOUND
+                - VERSION_CONFLICT
+                - REQUEST_NOT_PENDING
+                - RELATIONSHIP_NOT_ALLOWED
+                - SELF_RELATIONSHIP
+                - INVALID_CURSOR
+                - RATE_LIMITED
+                - PAYLOAD_TOO_LARGE
+                - UNSUPPORTED_MEDIA_TYPE
+                - INTERNAL_ERROR
+                - SERVICE_UNAVAILABLE
+            message:
+              type: string
+              minLength: 1
+              maxLength: 200
+            details:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                  - field
+                  - code
+                properties:
+                  field:
+                    type: string
+                    minLength: 1
+                    maxLength: 100
+                  code:
+                    type: string
+                    minLength: 1
+                    maxLength: 60
+        request_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+    Accepted:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          enum:
+            - 如该邮箱可用于此操作，我们将发送邮件。
+    EmailRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          description: ASCII邮箱，trim后整体小写；不折叠点号或+后缀。
+    RegistrationConfirmation:
+      type: object
+      additionalProperties: false
+      required:
+        - token
+        - password
+        - display_name
+      properties:
+        token:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{43}$
+          description: 32字节随机值的无填充base64url；示例为测试值。
+        password:
+          type: string
+          format: password
+          minLength: 12
+          maxLength: 128
+          writeOnly: true
+          description: Unicode标量长度；不trim或规范化。
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 40
+    PasswordReset:
+      type: object
+      additionalProperties: false
+      required:
+        - token
+        - new_password
+      properties:
+        token:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{43}$
+          description: 32字节随机值的无填充base64url；示例为测试值。
+        new_password:
+          type: string
+          format: password
+          minLength: 12
+          maxLength: 128
+          writeOnly: true
+          description: Unicode标量长度；不trim或规范化。
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+        - password
+        - device_name
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          description: ASCII邮箱，trim后整体小写；不折叠点号或+后缀。
+        password:
+          type: string
+          format: password
+          minLength: 1
+          maxLength: 128
+          writeOnly: true
+          description: Unicode标量长度；不trim或规范化。
+        device_name:
+          type: string
+          minLength: 1
+          maxLength: 80
+    RefreshRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        refresh_token:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{43}$
+          description: 32字节随机值的无填充base64url；示例为测试值。
+    ProfileUpdate:
+      type: object
+      additionalProperties: false
+      required:
+        - expected_version
+      properties:
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        bio:
+          type: string
+          minLength: 0
+          maxLength: 200
+        expected_version:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 9007199254740991
+      description: 至少提供display_name或bio之一；未知字段拒绝。
+      anyOf:
+        - required:
+            - display_name
+        - required:
+            - bio
+    PrivacyUpdate:
+      type: object
+      additionalProperties: false
+      required:
+        - is_private
+        - expected_version
+      properties:
+        is_private:
+          type: boolean
+        expected_version:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 9007199254740991
+    PasswordChange:
+      type: object
+      additionalProperties: false
+      required:
+        - current_password
+        - new_password
+      properties:
+        current_password:
+          type: string
+          format: password
+          minLength: 1
+          maxLength: 128
+          writeOnly: true
+          description: Unicode标量长度；不trim或规范化。
+        new_password:
+          type: string
+          format: password
+          minLength: 12
+          maxLength: 128
+          writeOnly: true
+          description: Unicode标量长度；不trim或规范化。
+    User:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - display_name
+        - bio
+        - is_private
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        bio:
+          type: string
+          minLength: 0
+          maxLength: 200
+        is_private:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+    Me:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - email
+        - display_name
+        - bio
+        - is_private
+        - version
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          description: ASCII邮箱，trim后整体小写；不折叠点号或+后缀。
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        bio:
+          type: string
+          minLength: 0
+          maxLength: 200
+        is_private:
+          type: boolean
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 9007199254740991
+        created_at:
+          type: string
+          format: date-time
+    RegistrationResult:
+      type: object
+      additionalProperties: false
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          format: uuid
+    Session:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - client_type
+        - device_name
+        - created_at
+        - last_seen_at
+        - idle_expires_at
+        - absolute_expires_at
+        - is_current
+        - state
+      properties:
+        id:
+          type: string
+          format: uuid
+        client_type:
+          type: string
+          enum:
+            - web
+            - android
+        device_name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        created_at:
+          type: string
+          format: date-time
+        last_seen_at:
+          type: string
+          format: date-time
+        idle_expires_at:
+          type: string
+          format: date-time
+        absolute_expires_at:
+          type: string
+          format: date-time
+        is_current:
+          type: boolean
+        state:
+          type: string
+          enum:
+            - active
+            - expired
+            - revoked
+    TokenPair:
+      type: object
+      additionalProperties: false
+      required:
+        - access_token
+        - refresh_token
+        - token_type
+        - access_expires_at
+      properties:
+        access_token:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{43}$
+          description: 32字节随机值的无填充base64url；示例为测试值。
+        refresh_token:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{43}$
+          description: 32字节随机值的无填充base64url；示例为测试值。
+        token_type:
+          type: string
+          enum:
+            - Bearer
+        access_expires_at:
+          type: string
+          format: date-time
+    WebSessionResult:
+      type: object
+      additionalProperties: false
+      required:
+        - session
+      properties:
+        session:
+          allOf:
+            - $ref: "#/components/schemas/Session"
+            - type: object
+              properties:
+                client_type:
+                  type: string
+                  enum:
+                    - web
+    AndroidSessionResult:
+      type: object
+      additionalProperties: false
+      required:
+        - session
+        - credentials
+      properties:
+        session:
+          allOf:
+            - $ref: "#/components/schemas/Session"
+            - type: object
+              properties:
+                client_type:
+                  type: string
+                  enum:
+                    - android
+        credentials:
+          $ref: "#/components/schemas/TokenPair"
+    SessionResult:
+      oneOf:
+        - $ref: "#/components/schemas/WebSessionResult"
+        - $ref: "#/components/schemas/AndroidSessionResult"
+      description: web 仅 session 并 Set-Cookie 两次；android含credentials并不设置cookie。
+    Relationship:
+      type: object
+      additionalProperties: false
+      required:
+        - target_user_id
+        - following_state
+        - followed_by
+        - is_mutual
+      properties:
+        target_user_id:
+          type: string
+          format: uuid
+        following_state:
+          type: string
+          enum:
+            - none
+            - pending
+            - accepted
+        followed_by:
+          type: boolean
+        is_mutual:
+          type: boolean
+    Follow:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - user
+        - state
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user:
+          $ref: "#/components/schemas/User"
+        state:
+          type: string
+          enum:
+            - pending
+            - accepted
+        created_at:
+          type: string
+          format: date-time
+    Block:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - user_id
+        - display_name
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        created_at:
+          type: string
+          format: date-time
+    Health:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+    SessionPage:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - next_cursor
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Session"
+        next_cursor:
+          type: string
+          nullable: true
+          maxLength: 2048
+    FollowPage:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - next_cursor
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Follow"
+        next_cursor:
+          type: string
+          nullable: true
+          maxLength: 2048
+    BlockPage:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - next_cursor
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Block"
+        next_cursor:
+          type: string
+          nullable: true
+          maxLength: 2048

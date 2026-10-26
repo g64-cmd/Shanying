@@ -2,6 +2,8 @@
 
 继承根 AGENTS.md。工作目录 .worktree/backend，分支 dev/backend，默认仅修改 backend/。
 
+首切片先读 docs/backend/engineering.md、account-database.md、account-state-machines.md、account-test-matrix.md 和 docs/api/account-access.md（均相对仓库根）；实现遵守 backend-foundation-account-access 的任务。当前这些文件为设计，不代表运行已验证。
+
 - Go + CloudWeGo Hertz，采用单机模块化单体：账号、内容、关系、消息、交易、资金、广告等领域隔离；本轮禁止微服务及分布式拆分。
 - 优先采用字节开源生态的 HTTP/中间件能力，不引入 Kitex/RPC；数据库不强求字节产品。
 - PostgreSQL 17 官方镜像作为初始数据存储方案；缓存、对象存储、转码队列的具体实现须在相应设计中确定。

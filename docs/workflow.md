@@ -37,6 +37,8 @@ git worktree add .worktree/android -b dev/android develop
 
 长期分支采用短周期合并，任务应尽量在一个业务切片内完成。根级共享文件只有协调者写入；worktree 并不能自动消除合并冲突。
 
+总路线define-shanying-platform不直接代替每个业务的实施设计。首个切片为backend-foundation-account-access，先冻结API/数据/状态/测试矩阵，再开始编码。后续订单、库存、支付、退款、平台费、佣金及结算在同一轮联合设计中确定，避免逐模块补丁式返工；详见docs/backend/engineering.md。
+
 ## 检查门槛
 
 - 基础结构：仓库检查脚本、OpenSpec strict validation、git diff --check、分支/worktree 映射。

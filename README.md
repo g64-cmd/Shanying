@@ -17,6 +17,7 @@
 
 从 [需求基线](docs/requirements.md)、[工作流](docs/workflow.md) 和 [AGENTS.md](AGENTS.md) 开始。
 当前产品规格为 [define-shanying-platform](openspec/changes/define-shanying-platform/proposal.md)，覆盖内容、隐私私聊、多商家交易、资金、广告及治理；业务实现尚未开始。
+当前细化切片为[后端底座＋账号权限](docs/backend/README.md)，包含工程规则、API、数据库、状态机与测试矩阵，尚未开始业务编码。
 开发环境 Windows 11；运行与集成验收环境 Ubuntu 26.04 LTS，服务优先 Docker Compose。
 
 检查：`node scripts/check-repository.mjs`；`openspec validate bootstrap-shanying-monorepo --strict`。
